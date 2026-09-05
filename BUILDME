@@ -50,6 +50,27 @@ for src in src/pub.*/; do
 
     mkdir -p "${dst%/*}"/
 
+    if [[ -f "$src".js ]]; then
+
+      npx rolldown "$src".js -o "$dst".combined.js -f iife
+
+      npx swc "$dst".combined.js -o "$dst".transpiled.js
+
+      if [[ "${MODE:-development}" == production ]]; then
+
+        npx rolldown "$dst".transpiled.js -o "$dst".js -m
+
+      else
+
+        cp "$dst".transpiled.js "$dst".js
+
+      fi
+
+      rm "$dst".combined.js
+      rm "$dst".transpiled.js
+
+    fi
+
     if [[ -f "$src".html ]]; then
 
       if [[ "${MODE:-development}" == production ]]; then
@@ -75,27 +96,6 @@ for src in src/pub.*/; do
         npx lightningcss "$src".css -o "$dst".css --bundle --browserslist
 
       fi
-
-    fi
-
-    if [[ -f "$src".js ]]; then
-
-      npx rolldown "$src".js -o "$dst".combined.js -f iife
-
-      npx swc "$dst".combined.js -o "$dst".transpiled.js
-
-      if [[ "${MODE:-development}" == production ]]; then
-
-        npx rolldown "$dst".transpiled.js -o "$dst".js -m
-
-      else
-
-        cp "$dst".transpiled.js "$dst".js
-
-      fi
-
-      rm "$dst".combined.js
-      rm "$dst".transpiled.js
 
     fi
 
@@ -138,4 +138,3 @@ for src in src/pub.*/; do
 done
 
 printf "Done\n"
-

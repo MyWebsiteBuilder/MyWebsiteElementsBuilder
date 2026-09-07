@@ -50,6 +50,20 @@ for src in src/pub.*/; do
 
     mkdir -p "${dst%/*}"/
 
+    if [[ -f "${src%/*}"/Handler.java ]]; then
+
+      if [[ "${MODE:-development}" == production ]]; then
+
+        javac -cp "dst/lib/*" "${src%/*}"/Handler.java -d "${dst%/*}"/
+
+      else
+
+        javac -cp "dst/lib/*" "${src%/*}"/Handler.java -d "${dst%/*}"/ -g
+
+      fi
+
+    fi
+
     if [[ -f "$src".js ]]; then
 
       npx rolldown "$src".js -o "$dst".combined.js -f iife
@@ -101,27 +115,17 @@ for src in src/pub.*/; do
 
     if [[ -f "${src%/*}"/Handler.java ]]; then
 
-      if [[ "${MODE:-development}" == production ]]; then
-
-        javac -cp "dst/lib/*" "${src%/*}"/Handler.java -d "${dst%/*}"/
-
-      else
-
-        javac -cp "dst/lib/*" "${src%/*}"/Handler.java -d "${dst%/*}"/ -g
-
-      fi
-
       args=(-C "${dst%/*}"/ Handler.class)
-
-      if [[ -f "$dst".html ]]; then
-
-        args+=(-C "${dst%/*}"/ "${dst##*/}".html)
-
-      fi
 
       if [[ -d "${src%/*}"/resources/ ]]; then
 
         args+=(-C "${src%/*}"/ resources/)
+
+      fi
+
+      if [[ -f "$dst".html ]]; then
+
+        args+=(-C "${dst%/*}"/ "${dst##*/}".html)
 
       fi
 
